@@ -1,13 +1,13 @@
 config = {
     "height": 32,
     "train_width": 384,
-    "batch_size": 128,
+    "batch_size": 1024,
     "epoch": 50,
     "print_per": 100,
     "save_per": 600,
 
-    "train_size": 200000,
-    "validate_size": 10000,
+    "train_size": 500000,
+    "validate_size": 20000,
 
     "pretrain": False,
     "pretrain_name": "chs_all.pt",

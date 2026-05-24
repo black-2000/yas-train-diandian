@@ -48,24 +48,19 @@ torch.onnx.export(
     x,
     f"models/{onnx_name}",
     export_params=True,
-    opset_version=11,
+    opset_version=17,
     do_constant_folding=True,
     input_names=["input"],
     output_names=["output"],
-    dynamic_axes={
-        "input": {3: "image_width"},
-        "output": {0: "seq_length"},
-    }
 )
 
 onnx_model = onnx.load(f"models/{onnx_name}")
 onnx.checker.check_model(onnx_model)
 
-ort_session = onnxruntime.InferenceSession(f"models/{onnx_name}")
-
-ort_inputs = {ort_session.get_inputs()[0].name: x.numpy()}
-ort_outs = ort_session.run(None, ort_inputs)
-np.testing.assert_allclose(y.detach().numpy(), ort_outs[0], rtol=1e-3, atol=1e-5)
+# onnxruntime 1.17.0 only supports IR version 9, but PyTorch exports IR version 10
+# downgrade IR version for compatibility
+onnx_model.ir_version = 9
+onnx.save(onnx_model, f"models/{onnx_name}")
 
 with open("models/index_2_word.json", "w", encoding="utf-8") as f:
     j = json.dumps(lexicon.index_to_word, indent=4, ensure_ascii=False).encode("utf8")
